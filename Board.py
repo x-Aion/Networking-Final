@@ -1,6 +1,6 @@
 class Board:
     def __init__(self, board_size=3):
-        self.default_piece = 0
+        self.default_piece = " "
         self.board_size = board_size
         self.board = None
         self.clearBoard()
@@ -18,16 +18,36 @@ class Board:
         """ When called it will attempt to make a move on a certain tile
             if the position is out of bounds or taken already will return a negative number """
 
+        if type(cell) == str:
+            if not cell.isnumeric():
+                return -1
+            else:
+                cell = int(cell)
+
         xPos, yPos = self.cellNumberToArrayCoords(cell)
 
         if xPos < 0 or xPos >= self.board_size or yPos < 0 or yPos >= self.board_size:
-            return -1
+            return -2
 
         if self.board[xPos][yPos] != self.default_piece:
-            return -2
+            return -3
 
         self.board[xPos][yPos] = tile_piece
         return 1
+
+    def isWinner(self, pos):
+        """ When called will check the user has won or not
+        if true is return, game was won on that play
+        if false is return either game lost or game is still in play
+        :returns Boolean"""
+
+        if type(pos) == str and pos.isnumeric():
+            pos = int(pos)
+
+        pos = self.cellNumberToArrayCoords(pos)
+
+        return self.checkVerticalWinCase(pos) or self.checkUpperRightDiagonal(pos)\
+               or self.checkUpperLeftDiagonal(pos) or self.checkHorizontalWinCase(pos)
 
     def checkUpperLeftDiagonal(self, pos):
         """ When called will check if a player has won on the upper left bottom right diagonal
@@ -99,7 +119,18 @@ class Board:
 
         return True
 
-    def printBoard(self):
+    def isBoardFull(self):
+        """ When called will check if there are any free cells
+            if there are no free cells can used in conjunction with isWinner
+            to conclude a tie """
+
+        for row in self.board:
+            for tile in row:
+                if tile == self.default_piece:
+                    return False
+        return True
+
+    def printBoard(self, mode=2):
         """ Prints the board"""
         # example
         #    | O |
@@ -107,8 +138,7 @@ class Board:
         #  O | X |
         # ---+---+---
         #    | X | O
-
-        print(self.__str__())
+        # print(self.__str__())
 
         # example
         #  1 | O | 3
@@ -116,15 +146,27 @@ class Board:
         #  O | X | 6
         # ---+---+---
         #  7 | X | O
-        print(self.__str__(withCellNumbers=True))
+        if mode == 0:
+            return self.__str__()
+
+        if mode == 1:
+            return self.__str__(withCellNumbers=True)
+
+        if mode == 2:
+            return self.__str__() + "\n\n" + self.__str__(withCellNumbers=True)
+
 
     def __str__(self, withCellNumbers=False):
         """ Converts the board into a printable string
             :param withCellNumbers True if the cell numbers should be displayed in empty cells"""
 
+        if withCellNumbers:
+            base = ["Tile mappings"]
+        else:
+            base = []
+
         i = 0
         row_divider = "---" + "+---" * (self.board_size - 1)
-        base = []
         for row_index, row in enumerate(self.board, 1):
             row_string = ""
             for tile_index, tile in enumerate(row, 1):
