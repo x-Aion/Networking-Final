@@ -14,7 +14,7 @@ To run the CLI do the following steps:
 * In a new process run **ServerClient.py** again but select 2
 * Fill in the required information including the IP you copied and have fun!
 
-to generate an output file the client must quit by typing quit when prompted
+To generate an output file the client must quit by typing quit when prompted
 otherwise the outfile will not save properly
 
 ### GUI
