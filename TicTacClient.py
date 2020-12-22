@@ -12,6 +12,12 @@ Lbel = tk.Label(Frame1, text = "Enter Name:")
 Lbel.pack(side=tk.LEFT)
 CharName = tk.Entry(Frame1)
 CharName.pack(side=tk.LEFT)
+
+label_ip = tk.Label(Frame1, text = "Enter Server IP:")
+label_ip.pack(side=tk.LEFT)
+entry_ip = tk.Entry(Frame1)
+entry_ip.pack(side=tk.LEFT)
+
 Clicker = tk.Button(Frame1, text="Connect", command=lambda : connect())
 Clicker.pack(side=tk.LEFT)
 Frame1.pack(side=tk.TOP)
@@ -21,24 +27,23 @@ Frame2 = tk.Frame(main_win)
 # network client
 client = None
 HOST_IP = "0.0.0.0"
-PORT_OF_HOST = 8080
+PORT_OF_HOST = 1234
 
 my_turn = False
 iStart = False
 Label_List = []
 Columns = 3
 
-
 my_details = {
     "name": "HP",
-    "wins" : 0,
+    "score" : 0,
     "symbol" : "X",
     "colour" : "",
 }
 
 enemy_detail = {
     "name": " ",
-    "wins": 0,
+    "score": 0,
     "symbol": "O",
     "colour": "",
 }
@@ -102,7 +107,8 @@ def get_cordinate(xy):
             label["ticked"] = True
             label["symbol"] = my_details["symbol"]
             # send xy cordinate to server
-            client.send("$xy$" + str(xy[0]) + "$" + str(xy[1]))
+            client.send(str.encode("$xy$" + str(xy[0]) + "$" + str(xy[1])))
+            print("$xy$" + str(xy[0]) + "$" + str(xy[1]))
             my_turn = False
 
             # Does this play leads to a win or a draw
@@ -251,17 +257,22 @@ def connect():
     global my_details
     if len(CharName.get()) < 1:
         tk.messagebox.showerror(title="ERROR!!!", message="You MUST enter your first name <e.g. John>")
+    elif len(entry_ip.get()) < 1:
+        tk.messagebox.showerror(title="ERROR!!!", message="You MUST enter an IP <e.g. 192.168.0.1>")
     else:
-        my_details["name"] = CharName.get()
-        connect_to_server(CharName.get())
+        my_details["name"] = CharName.get().strip()
+        my_details["server_ip"] = entry_ip.get().strip()
+
+        connect_to_server(my_details["name"], my_details["server_ip"])
 
 
-def connect_to_server(name):
-    global client, PORT_OF_HOST, HOST_IP
+def connect_to_server(name, HOST_IP):
+    global client, PORT_OF_HOST #, HOST_IP
+
     try:
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client.connect((HOST_IP, PORT_OF_HOST))
-        client.send(name)
+        client.send(name.encode())
         threading._start_new_thread(receive_message_from_server, (client, "m"))
         Frame1.pack_forget()
         Frame2.pack(side=tk.TOP)
@@ -271,6 +282,7 @@ def connect_to_server(name):
             PORT_OF_HOST) + " Server may be Unavailable. Try again later")
 
 
+
 def receive_message_from_server(sck, m):
     global my_details, enemy_detail, my_turn, you_started
     while True:
@@ -278,6 +290,7 @@ def receive_message_from_server(sck, m):
 
         if not from_server: break
 
+        from_server = from_server.decode()
         if from_server.startswith("welcome"):
             if from_server == "welcome1":
                 my_details["color"] = "purple"

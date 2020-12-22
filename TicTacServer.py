@@ -38,8 +38,8 @@ clients = []
 clients_names = []
 player_data = []
 server = None
-HOST_IP = "0.0.0.0"
-PORT_OF_HOST = 8080
+HOST_IP = socket.gethostbyname(socket.gethostname())
+PORT_OF_HOST = 1234
 client_name = " "
 
 # Starting up the server
@@ -84,12 +84,12 @@ def send_receive(client_connection, client_ip_addr):
 
     client_msg = " "
 
-    client_name = client_connection.recv(4096)
+    client_name = client_connection.recv(4096).decode()
 
     if len(clients) < 2:
-        client_connection.send("welcome1")
+        client_connection.send(str.encode("welcome1"))
     else:
-        client_connection.send("welcome2")
+        client_connection.send(str.encode("welcome2"))
 
     clients_names.append(client_name)
     update_client_names_display(clients_names)  # update client names display
@@ -99,8 +99,8 @@ def send_receive(client_connection, client_ip_addr):
         symbols = ["O", "X"]
 
         # This will tell the enemy what their symbol is (x or o)
-        clients[0].send("opponent_name$" + clients_names[1] + "symbol" + symbols[0])
-        clients[1].send("opponent_name$" + clients_names[0] + "symbol" + symbols[1])
+        clients[0].send(str.encode("opponent_name$" + clients_names[1] + "symbol" + symbols[0]))
+        clients[1].send(str.encode("opponent_name$" + clients_names[0] + "symbol" + symbols[1]))
 
 
     while True:
@@ -109,8 +109,7 @@ def send_receive(client_connection, client_ip_addr):
         data = client_connection.recv(4096)
         if not data: break
 
-
-        if data.startswith("$xy$"):
+        if data.decode().startswith("$xy$"):
 
             if client_connection == clients[0]:
 
