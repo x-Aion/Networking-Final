@@ -3,7 +3,7 @@ This is the final project for our COMP-3670 class
 
 Include in the git  is a CLI and a GUI implementation of TicTacToe 
 
-Users are able to play the game over the network, for non local games the server must be ran in a port-forwared environment (e.g. University servers)
+Users are able to play the game over the network, for non local games the server must be ran in a port-forwared environment
 
 ### CLI
 
